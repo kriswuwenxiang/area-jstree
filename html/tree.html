@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>jsTree树</title>
+	
+	<link rel="stylesheet" type="text/css" href="../css/jsTree/style.min.css">
+	
+	<script type="text/javascript" src="../js/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="../js/jstree.js"></script>
+	
+	<style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        .wapper{
+	        font-family: 'Microsoft YaHei';
+	        width: 100%;
+            height:100%;
+            background-color: #FFF;
+            color: #7D7D7D;
+            font-size: 14px;
+            overflow:hidden;
+        }
+        .wapper_left{
+        	float: left;
+        	width: 20%;
+        	height: 100%;
+        	border-right: 1px solid #7D7D7D;
+        	background-color: #EBF7FE;
+        }
+        .wapper_right{
+        	float: right;
+        	width: 80%;
+        	height: 100%;
+        }
+        .clear{
+            clear: both;
+        }
+        
+        .vakata-context{
+        	font-size: 14px;
+        }
+        .icon_add{
+        	background: url(../image/add.png) no-repeat !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_edit{
+        	background: url(../image/edit.png) no-repeat !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_delete{
+        	background: url(../image/delete.png) no-repeat !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_country{
+        	background-image: url(../image/country.png) !important;
+        	background-size: auto !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_province{
+        	background-image: url(../image/province.png) !important;
+        	background-size: auto !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_city{
+        	background-image: url(../image/city.png) !important;
+        	background-size: auto !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_unit{
+        	background-image: url(../image/unit.png) !important;
+        	background-size: auto !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_inverter{
+        	background-image: url(../image/inverter.png) !important;
+        	background-size: auto !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_junctionBox{
+        	background-image: url(../image/junctionBox.png) !important;
+        	background-size: auto !important;
+        	background-position: 50% 50% !important;
+        }
+        
+        /*弹出框*/
+		.popup_tree{ width:315px;height:155px;border:5px solid #A9ADB3;background:#EBF7FE;position:absolute;z-index:9001;display:none;}
+		.popup_tree .title{ width:100%;height:45px;font-size:14px;line-height:45px;color:#FFF;background:#1B578E;}
+		.popup_tree .title .name{ float:left;padding-left:10px;}
+		.popup_tree .title .close{ float:right;padding:7px 10px 0 0;height:23px;cursor:pointer;}
+		.popup_tree .content{ width:100%;text-align:center;vertical-align:middle;font-size:12px;color:#7D7D7D;}
+		.popup_tree .contentDiv{ margin:20px auto;width:225px;height:25px;line-height:25px;}
+		.popup_tree .foot{ float:left;width:100%;height:45px;text-align:center;font-size:12px;background:#E0EDF1;}
+		.popup_tree .footDiv{ width:160px;height:25px;margin:10px auto;}
+		.popup_tree .foot_left{ float:left;width:55px;height:25px;line-height:25px;color:#FFF;background:#1B578E;border-radius: 3px;-webkit-border-radius: 3px;-moz-border-radius: 3px;cursor:pointer;}
+		.popup_tree .foot_right{ float:right;width:55px;height:25px;line-height:25px;color:#1B578E;background:#D8D8D8;border-radius: 3px;-webkit-border-radius: 3px;-moz-border-radius: 3px;cursor:pointer;}
+		/*弹出框*/
+    </style>
+	
+  </head>
+  
+  <body>
+  	<!-- 树 -->
+    <div class="wapper">
+    	<div class="clear"></div>
+    	<div class="wapper_left">
+    		<div id="jstree"></div>
+    	</div>
+    	<div class="wapper_right"></div>
+    </div>
+    <!-- 树 -->
+  	<!-- 弹出框 -->
+	<div class="popup_tree" id="popup_tree">
+		<div class="title">
+			<span class="name" id="popup_tree_title">新增</span>
+			<span class="close">
+				<img src="../image/close.png" id="popup_tree_close">
+			</span>
+		</div>
+		<div class="content">
+			<div class="contentDiv">
+				<span>名称:</span>
+				<input type="text" id="popup_tree_name" name="popup_tree_name">
+			</div>
+		</div>
+		<div class="foot">
+			<div class="footDiv">
+				<span class="foot_left" id="popup_tree_confirm">确认</span>
+				<span class="foot_right" id="popup_tree_cancel">取消</span>
+			</div>
+		</div>
+	</div>
+	<!-- 弹出框 -->
+  <script>
+  	var global_tree,//树对象
+  		global_tree_node,//当前右键菜单关联的的节点
+  		global_flag,//当前操作（true:增加, false:编辑）
+  		isDevice = 'inverter';//当前添加的设备类型（inverter:逆变器, junctionBox:汇流箱）
+  		var jstree_addCount = 200;
+  	var tree_data = [
+			         {
+			        	 'text': '国家',
+			        	 'id': -1,
+			        	 'type': 'country',
+			        	 'grade': '1',
+			        	 'children': [
+			        	              {
+			        	            	  'text': '福建',
+			        	            	  'id': 1,
+			        	            	  'type': 'province',
+			        	            	  'grade': '2',
+			        	            	  'children': [
+			        	            	               {
+			        	            	            	   'text': '泉州',
+			        	            	            	   'id': 101,
+			        	            	            	   'type': 'city',
+			        	            	            	   'grade': '3',
+			        	            	            	   'children': [
+			        	            	            	                {
+			        	            	            	                	   'text': '单元1',
+			        	            	            	                	   'id': 101001,
+			        	            	            	                	   'type': 'unit',
+			        	            	            	                	   'grade': '4',
+								        	            	            	   'children': [
+								        	            	            	                {
+								        	            	            	                	'text': '逆变器1',
+								        	            	            	                	'id': 101001001,
+								        	            	            	                	'type': 'inverter',
+								        	            	            	                	'grade': '5',
+												        	            	            	   'children': [
+												        	            	            	                {
+												        	            	            	                	'text': '汇流箱1',
+												        	            	            	                	'id': 101001001001,
+												        	            	            	                	'type': 'junctionBox',
+												        	            	            	                	'grade': '6'
+												        	            	            	                },
+												        	            	            	                {
+												        	            	            	                	'text': '汇流箱2',
+												        	            	            	                	'id': 101001001002,
+												        	            	            	                	'type': 'junctionBox',
+												        	            	            	                	'grade': '6'
+												        	            	            	                }
+												        	            	            	                ]
+								        	            	            	                },
+								        	            	            	                {
+								        	            	            	                	'text': '逆变器2',
+								        	            	            	                	'id': 101001002,
+								        	            	            	                	'type': 'inverter',
+								        	            	            	                	'grade': '5'
+								        	            	            	                }
+								        	            	            	                ,
+								        	            	            	                {
+								        	            	            	                	'text': '逆变器3',
+								        	            	            	                	'id': 101001003,
+								        	            	            	                	'type': 'inverter',
+								        	            	            	                	'grade': '5',
+												        	            	            	   'children': [
+												        	            	            	                {
+												        	            	            	                	'text': '汇流箱3',
+												        	            	            	                	'id': 101001001003,
+												        	            	            	                	'type': 'junctionBox',
+												        	            	            	                	'grade': '6'
+												        	            	            	                },
+												        	            	            	                {
+												        	            	            	                	'text': '汇流箱4',
+												        	            	            	                	'id': 101001001004,
+												        	            	            	                	'type': 'junctionBox',
+												        	            	            	                	'grade': '6'
+												        	            	            	                }
+												        	            	            	                ]
+								        	            	            	                }
+								        	            	            	                ]
+			        	            	            	                },
+			        	            	            	                {
+			        	            	            	                	'text': '单元2',
+			        	            	            	                	'id': 101002,
+			        	            	            	                	'type': 'unit',
+			        	            	            	                	'grade': '4'
+			        	            	            	                },
+			        	            	            	                {
+			        	            	            	                	'text': '单元3',
+			        	            	            	                	'id': 101003,
+			        	            	            	                	'type': 'unit',
+			        	            	            	                	'grade': '4'
+			        	            	            	                },
+			        	            	            	                {
+			        	            	            	                	'text': '单元4',
+			        	            	            	                	'id': 101004,
+			        	            	            	                	'type': 'unit',
+			        	            	            	                	'grade': '4'
+			        	            	            	                }
+			        	            	            	                ]
+			        	            	               },
+			        	            	               {
+			        	            	            	   'text': '厦门',
+			        	            	            	   'id': 103,
+			        	            	            	   'type': 'city',
+			        	            	            	   'grade': '3'
+			        	            	               },
+			        	            	               {
+			        	            	            	   'text': '福州',
+			        	            	            	   'id': 104,
+			        	            	            	   'type': 'city',
+			        	            	            	   'grade': '3'
+			        	            	               }
+			        	            	               ]
+			        	              },
+			        	              {
+			        	            	  'text': '四川',
+			        	            	  'id': 2,
+			        	            	  'type': 'province',
+			        	            	  'grade': '2',
+			        	            	  'children': [
+			        	            	               {
+			        	            	            	   'text': '成都',
+			        	            	            	   'id': 105,
+			        	            	            	   'type': 'city',
+			        	            	            	   'grade': '3'
+			        	            	               }
+			        	            	               ]
+			        	              },
+			        	              {
+			        	            	  'text': '广东',
+			        	            	  'id': 3,
+			        	            	  'type': 'province',
+			        	            	  'grade': '2'
+			        	              }
+			        	              ]
+			         }
+			         ];
+  	var test_data = 
+	[
+	    {
+	        "value": "inverter_1",
+	        "text": "逆变器1",
+	        "status": 0
+	    },
+	    {
+	        "value": "inverter_2",
+	        "text": "逆变器2",
+	        "status": 0
+	    },
+	    {
+	        "value": "inverter_3",
+	        "text": "逆变器3",
+	        "status": 1
+	    },
+	    {
+	        "value": "inverter_4",
+	        "text": "逆变器4",
+	        "status": 0
+	    }
+	]; 
+  	
+  	
+  	
+  	function getTreeData(){//获取树数据
+        /* $.ajax({
+			type : 'post',
+			url : '',
+			dataType : 'json',
+			async: false,
+			data : '',
+			success : function(result, textStatus) {// 请求成功处理
+				if (result.code == 0) {
+					tree_data = result.data;
+				} else {
+					Global.alertError(result.message);
+				}
+			},
+			error : function() {// 请求出错处理
+				Global.alertError('Error');
+			}
+		}); */
+    }
+    function context_menu(node){//右键菜单
+			 var tree = $('#jstree').jstree(true);
+			 global_tree = tree;
+			 global_tree_node = node;
+			 
+			 //右键菜单权限开始
+			 var add_region_disabled = false;
+			 var add_device_disabled = false;
+			 var modify_disabled = false;
+			 var del_disabled = false;
+			 
+			 if(node.original.grade == 1){
+			 	add_device_disabled = true;
+			 	modify_disabled = true;
+			 	del_disabled = true;
+			 }
+			 else if(node.original.grade == 2){
+			 	add_device_disabled = true;
+			 }
+			 else if(node.original.grade == 3 || node.original.grade == 4){
+			 	add_region_disabled = true;
+			 }
+			 else if(node.original.grade == 5){
+			 	add_region_disabled = true;
+			 	modify_disabled = true;
+			 }
+			 else{
+				 add_region_disabled = true;
+				 add_device_disabled = true;
+			 	 modify_disabled = true;
+			 }
+			 //右键菜单权限结束
+		  
+		    var items = {
+		    		"新增":{//添加菜单
+	                    "label": "新增",  
+	                    "icon": "icon_add",
+	                    "_disabled": add_region_disabled,
+	                    "action": function(data){ 
+	                        global_flag = true;
+	                        if($("#maskLayer").length == 0){
+								$('<div id="maskLayer"></div>').appendTo("body").css({
+									"background":"#000","opacity":".6","top":0,"left":0,"width":"100%","height":"100%","min-width":"1825px","min-height":"945px","position":"absolute","zIndex":"8000"
+								});
+							}
+							var _obj= $("#popup_tree");
+							var left=($(document).width()-_obj.width())/2;
+							var top =($(document).height()-_obj.height())/2;
+							_obj.css({"left":left,"top":top,"display":"block"});
+	                    }  
+	                },
+	                "编辑":{//修改菜单
+	                    "label": "编辑",  
+	                    "_disabled": modify_disabled,
+	                    "icon": "icon_edit",
+	                    "action": function(data){  
+	                    	global_flag = false;
+	                    	$('#popup_tree_name').val(node.text);
+	                        if(node.original.grade == 2 || node.original.grade == 3){
+	                        	$("#popup_tree_title").html("修改区域");
+	                        }else if(node.original.grade == 4){
+	                        	$("#popup_tree_title").html("修改单元");
+	                        }
+	                        if($("#maskLayer").length == 0){
+								$('<div id="maskLayer"></div>').appendTo("body").css({
+									"background":"#000","opacity":".6","top":0,"left":0,"width":"100%","height":"100%","min-width":"1825px","min-height":"945px","position":"absolute","zIndex":"8000"
+								});
+							}
+							var _obj= $("#popup_tree");
+							var left=($(document).width()-_obj.width())/2;
+							var top =($(document).height()-_obj.height())/2;
+							_obj.css({"left":left,"top":top,"display":"block"});
+	                    }  
+	                },
+	                "删除":{//删除菜单
+	                    "label": "删除",  
+	                    "icon": "icon_delete",
+	                    "_disabled": del_disabled,
+	                    "action": function(data){  
+	                    	if( window.confirm("确认删除该节点？")){
+	                    		tree.delete_node(node);
+	                    		/* $.ajax({
+	                				type : 'post',
+	                				url : '',
+	                				dataType : 'json',
+	                				async: false,
+	                				data : node.id,
+	                				success : function(result, textStatus) {// 请求成功处理
+	                					if (result.code == 0) {
+	                						tree.delete_node(node);
+	                					} else {
+	                						Global.alertError(result.msg);
+	                					}
+	                				},
+	                				error : function() {// 请求出错处理
+	                					Global.alertError('Error');
+	                				}
+	                			}); */
+	                    	}
+	                    }  
+	                }
+		    };
+		    return items;
+	}
+	$("#popup_tree_close").click(function(){//关闭
+		close_popup_tree();
+	});
+	$("#popup_tree_cancel").click(function(){//取消
+		close_popup_tree();
+	});
+    $("#popup_tree_confirm").click(function () {//保存
+		if(	$('#popup_tree_name').val().trim() == "" ){
+			alert("请填写名称！");
+			return false;
+		}else{
+			var data,url;
+			var return_id = '';//请求成功后返回的id
+			var return_flag = false;//请求是否成功
+			if(global_flag){//增加
+				data = 'parentId='+global_tree_node.id+'&name='+$('#popup_tree_name').val();
+				url = '';
+			}else{//修改
+				data = 'id='+global_tree_node.id+'&name='+$('#popup_tree_name').val();
+				url = '';
+			}
+			
+			return_flag = true;
+			return_id = jstree_addCount++;//测试用的
+			/* $.ajax({
+				type : 'post',
+				url : url,
+				dataType : 'json',
+				async: false,
+				data : data,
+				success : function(result, textStatus) {// 请求成功处理
+					if (result.code == 0) {
+						return_flag = true;
+						return_id = 999;
+					} else {
+						Global.alertError(result.message);
+					}
+				},
+				error : function() {// 请求出错处理
+					Global.alertError('Error');
+				}
+			}); */
+			if(return_flag){
+				if(global_flag){//增加
+					var node_type,node_grade;
+					if(global_tree_node.original.grade == 1){
+						node_type = 'province';
+						node_grade = '2';
+					}else if(global_tree_node.original.grade == 2){
+						node_type = 'city';
+						node_grade = '3';
+					}else if(global_tree_node.original.grade == 3){
+						node_type = 'unit';
+						node_grade = '4';
+					}
+					var new_node = {
+	                    	'id': return_id,
+		                	'text': $('#popup_tree_name').val(),
+		                	'type': node_type,
+		                	'grade': node_grade
+		            };
+					var $node = global_tree.create_node(global_tree_node,new_node,'last');
+					global_tree.edit($node);
+					close_popup_tree();
+					$('#jstree').focus();
+				}else{//修改
+					global_tree.rename_node(global_tree_node,$('#popup_tree_name').val());
+					close_popup_tree();
+				}
+			}
+		}
+	});
+	function close_popup_tree(){
+		$("#popup_tree_name").val("");
+		$("#popup_tree").hide();
+		$("#maskLayer").remove();
+	}
+    
+    
+    
+    //加载树
+	getTreeData();
+	$('#jstree')
+	.bind("loaded.jstree", function (e, data) {
+		$('#jstree').jstree('open_all');
+	})
+	.jstree({
+		'core': {
+			'data': tree_data,
+			'check_callback' : true
+		},
+		'plugins' : [ 'types', 'contextmenu' ],
+		'types': {
+			'default': {
+				'icon': ''
+			},
+			'country': {
+				'icon': 'icon_country'
+			},
+			'province': {
+				'icon': 'icon_province'
+			},
+			'city': {
+				'icon': 'icon_city'
+			},
+			'unit': {
+				'icon': 'icon_unit'
+			},
+			'inverter': {
+				'icon': 'icon_inverter'
+			},
+			'junctionBox': {
+				'icon': 'icon_junctionBox'
+			}
+		},
+		'contextmenu': {
+			'items': context_menu
+		}
+	});
+  </script>
+  </body>
+</html>

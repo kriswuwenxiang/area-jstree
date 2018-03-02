@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>jsTree树</title>
+	
+	<link rel="stylesheet" type="text/css" href="../css/jsTree/style.min.css">
+	
+	<script type="text/javascript" src="../js/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="../js/jstree.js"></script>
+	<script type="text/javascript" src="../js/createTree.js"></script>
+	<script type="text/javascript" src="../js/createTreeMul.js"></script>
+	
+	<style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        .wapper{
+	        font-family: 'Microsoft YaHei';
+	        width: 100%;
+            height:100%;
+            background-color: #FFF;
+            color: #7D7D7D;
+            font-size: 14px;
+            overflow:hidden;
+        }
+        .wapper_left{
+        	float: left;
+        	width: 20%;
+        	height: 100%;
+        	border-right: 1px solid #7D7D7D;
+        	background-color: #EBF7FE;
+        }
+        .wapper_right{
+        	float: right;
+        	width: 80%;
+        	height: 100%;
+        }
+        .clear{
+            clear: both;
+        }
+        
+        .vakata-context{
+        	font-size: 14px;
+        }
+        .icon_add{
+        	background: url(../image/add.png) no-repeat !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_edit{
+        	background: url(../image/edit.png) no-repeat !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_delete{
+        	background: url(../image/delete.png) no-repeat !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_country{
+        	background-image: url(../image/country.png) !important;
+        	background-size: auto !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_province{
+        	background-image: url(../image/province.png) !important;
+        	background-size: auto !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_city{
+        	background-image: url(../image/city.png) !important;
+        	background-size: auto !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_unit{
+        	background-image: url(../image/unit.png) !important;
+        	background-size: auto !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_inverter{
+        	background-image: url(../image/inverter.png) !important;
+        	background-size: auto !important;
+        	background-position: 50% 50% !important;
+        }
+        .icon_junctionBox{
+        	background-image: url(../image/junctionBox.png) !important;
+        	background-size: auto !important;
+        	background-position: 50% 50% !important;
+        }
+        
+        /*弹出框*/
+		.popup_tree{ width:315px;height:155px;border:5px solid #A9ADB3;background:#EBF7FE;z-index:9001;display:block;}
+		.popup_tree .title{ width:100%;height:45px;font-size:14px;line-height:45px;color:#FFF;background:#1B578E;}
+		.popup_tree .title .name{ float:left;padding-left:10px;}
+		.popup_tree .title .close{ float:right;padding:7px 10px 0 0;height:23px;cursor:pointer;}
+		.popup_tree .content{ width:100%;/* text-align:center; */vertical-align:middle;font-size:12px;color:#7D7D7D;}
+		.popup_tree .contentDiv{ margin:20px auto;width:225px;height:25px;line-height:25px;}
+		.popup_tree .foot{ float:left;width:100%;height:45px;text-align:center;font-size:12px;background:#E0EDF1;}
+		.popup_tree .footDiv{ width:160px;height:25px;margin:10px auto;}
+		.popup_tree .foot_left{ float:left;width:55px;height:25px;line-height:25px;color:#FFF;background:#1B578E;border-radius: 3px;-webkit-border-radius: 3px;-moz-border-radius: 3px;cursor:pointer;}
+		.popup_tree .foot_right{ float:right;width:55px;height:25px;line-height:25px;color:#1B578E;background:#D8D8D8;border-radius: 3px;-webkit-border-radius: 3px;-moz-border-radius: 3px;cursor:pointer;}
+		/*弹出框*/
+		
+		.treediv{
+			display:none;
+			position:absolute;
+			overflow-y:auto;
+			width:158px;
+			line-height:0px;
+			height:200px;
+			padding-top:4px;
+			background:#fff;
+			border:1px solid #cccccc
+		}
+    </style>
+	
+  </head>
+  
+  <body>
+  	<!-- 树 -->
+    <!-- <div class="wapper">
+    	<div class="clear"></div>
+    	<div class="wapper_left">
+    		<div id="jstree2"></div>
+    	</div>
+    	<div class="wapper_right"></div>
+    </div> -->
+    <!-- 树 -->
+  	<!-- 弹出框 -->
+	<div class="popup_tree" id="popup_tree">
+		<div class="title">
+			<span class="name" id="popup_tree_title">新增</span>
+			<span class="close">
+				<img src="../image/close.png" id="popup_tree_close">
+			</span>
+		</div>
+		<div class="content">
+			<div class="contentDiv">
+				<span>名称:</span>
+				<input type="hidden" id="popup_tree_id" name="popup_tree_id"/>
+				<input type="text" id="popup_tree_name" name="popup_tree_name" readonly/>
+			</div>
+		</div>
+		<div class="foot">
+			<div class="footDiv">
+				<span class="foot_left" id="popup_tree_confirm">确认</span>
+				<span class="foot_right" id="popup_tree_cancel">取消</span>
+			</div>
+		</div>
+	</div>
+	<div class="popup_tree" id="popup_tree2">
+		<div class="title">
+			<span class="name" id="popup_tree_title2">新增</span>
+			<span class="close">
+				<img src="../image/close.png" id="popup_tree_close2">
+			</span>
+		</div>
+		<div class="content">
+			<div class="contentDiv">
+				<span>名称2:</span>
+				<input type="hidden" id="popup_tree_id2" name="popup_tree_id2"/>
+				<input type="text" id="popup_tree_name2" name="popup_tree_name2" readonly/>
+			</div>
+		</div>
+		<div class="foot">
+			<div class="footDiv">
+				<span class="foot_left" id="popup_tree_confirm2">确认</span>
+				<span class="foot_right" id="popup_tree_cancel2">取消</span>
+			</div>
+		</div>
+	</div>
+	<div class="popup_tree" id="popup_tree3">
+		<div class="title">
+			<span class="name" id="popup_tree_title3">新增</span>
+			<span class="close">
+				<img src="../image/close.png" id="popup_tree_close3">
+			</span>
+		</div>
+		<div class="content">
+			<div class="contentDiv">
+				<span>名称3:</span>
+				<input type="hidden" id="popup_tree_id3" name="popup_tree_id3"/>
+				<input type="text" id="popup_tree_name3" name="popup_tree_name3" readonly/>
+			</div>
+		</div>
+		<div class="foot">
+			<div class="footDiv">
+				<span class="foot_left" id="popup_tree_confirm3">确认</span>
+				<span class="foot_right" id="popup_tree_cancel3">取消</span>
+			</div>
+		</div>
+	</div>
+	<!-- 弹出框 -->
+  <script>
+  	$(document).ready(function() {
+  		//单选:CreateTree
+		var tree1 = new CreateTree("jstree","popup_tree_id","popup_tree_name",{},"",null,function(){
+			alert('该节点的id为:'+$('#popup_tree_id').val()+';name为:'+$('#popup_tree_name').val());
+		});
+		var tree1_data = tree1.getTreeNodes();
+	  	tree1.setSelNode(3);
+	  	tree1.enableNode(-1);
+	  	tree1.disableNode(2);
+	  	tree1.openAll();
+	  	/*window.setTimeout(function(){//测试
+	  		var node = $('#jstree').jstree("get_node", $('#3_anchor'));debugger;
+			$('#jstree').jstree('hover_node',node);
+		},2000);*/
+
+	  	var tree2 = new CreateTree("jstree2","popup_tree_id2","popup_tree_name2",{},"",null,null);
+	  	tree2.setSelNode(2);
+	  	tree2.closeAll();
+
+	  	//多选:CreateTreeMul
+	  	var tree3 = new CreateTreeMul("jstree3","popup_tree_id3","popup_tree_name3",3,{},"",null,function(){
+			
+		});
+		tree3.setSelNode('12,13');
+	});
+  </script>
+  </body>
+</html>
